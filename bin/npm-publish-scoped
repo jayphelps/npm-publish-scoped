@@ -1,0 +1,43 @@
+#!/usr/bin/env node
+
+const { execSync } = require('child_process');
+const { writeFileSync } = require('fs');
+
+const getUser = () => {
+  const result = execSync('npm whoami', { encoding: 'utf-8' });
+  // remove newline at the end
+  return result.slice(0, result.length - 1);
+};
+
+const user = getUser();
+const scope = process.argv[2] || user;
+const packageJson = require(process.cwd() + '/package.json');
+const originalName = packageJson.name;
+
+const getNewName = () => {
+  const hasExistingScope = !!originalName.match(/^@([^\/]+)\//);;
+  if (hasExistingScope) {
+    return originalName.replace(/^@([^\/]+)\//, `@${scope}/`);
+  } else {
+    return `@${scope}/${originalName}`;
+  }
+};
+
+const newName = getNewName();
+packageJson.name = newName;
+
+// Publish temporary
+writeFileSync('./package.json', JSON.stringify(packageJson, null, 2));
+execSync('npm publish --tag next --access public');
+console.log(`Success. Install your package with:
+
+  npm install ${packageJson.name}@next --save
+
+  # or
+
+  npm install ${packageJson.name}@next --save-dev
+`);
+
+// Revert changes
+packageJson.name = originalName;
+writeFileSync('./package.json', JSON.stringify(packageJson, null, 2));

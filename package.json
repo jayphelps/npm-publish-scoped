@@ -1,0 +1,6 @@
+{
+  "name": "npm-publish-scoped",
+  "version": "0.0.1",
+  "description": "Publish any package temporarily to your @user scope, while you wait for them cut a release. Useful when your PR is merged and you don't want to wait.",
+  "bin": "bin/npm-publish-scoped"
+}
